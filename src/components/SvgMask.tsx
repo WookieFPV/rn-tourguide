@@ -37,6 +37,8 @@ interface State {
   animation: Animated.Value
   canvasSize: ValueXY
   previousPath: string
+
+  svgPath: string
 }
 
 const IS_WEB = Platform.OS !== 'web'
@@ -54,7 +56,6 @@ export class SvgMask extends Component<Props, State> {
   mask: React.RefObject<PathProps> = React.createRef()
 
   windowDimensions: ScaledSize | null = null
-  firstPath: string | undefined
 
   constructor(props: Props) {
     super(props)
@@ -63,12 +64,6 @@ export class SvgMask extends Component<Props, State> {
       android: Dimensions.get('screen'),
       default: Dimensions.get('window'),
     })
-
-    this.firstPath = `M0,0H${this.windowDimensions.width}V${
-      this.windowDimensions.height
-    }H0V0ZM${this.windowDimensions.width / 2},${
-      this.windowDimensions.height / 2
-    } h 1 v 1 h -1 Z`
 
     this.state = {
       canvasSize: {
@@ -79,7 +74,12 @@ export class SvgMask extends Component<Props, State> {
       position: props.position,
       opacity: new Animated.Value(0),
       animation: new Animated.Value(0),
-      previousPath: this.firstPath,
+      previousPath: `M0,0H${this.windowDimensions.width}V${
+        this.windowDimensions.height
+      }H0V0ZM${this.windowDimensions.width / 2},${
+        this.windowDimensions.height / 2
+      } h 1 v 1 h -1 Z`,
+      svgPath: "",
     }
 
     this.listenerID = this.state.animation.addListener(this.animationListener)
@@ -126,8 +126,8 @@ export class SvgMask extends Component<Props, State> {
     this.rafID = requestAnimationFrame(() => {
       if (this.mask && this.mask.current) {
         if (IS_WEB) {
-          // @ts-ignore
-          this.mask.current.setNativeProps({ d })
+console.log("FFFFFFFFF d: "+d)
+          this.setState({svgPath: d})
         } else {
           // @ts-ignore
           this.mask.current._touchableNode.setAttribute('d', d)
@@ -201,11 +201,10 @@ export class SvgMask extends Component<Props, State> {
           height={this.state.canvasSize.y}
         >
           <AnimatedSvgPath
-            ref={this.mask}
             fill={this.props.backdropColor}
             strokeWidth={0}
             fillRule='evenodd'
-            d={this.firstPath}
+            d={this.state.svgPath}
             opacity={this.state.opacity as any}
           />
         </Svg>

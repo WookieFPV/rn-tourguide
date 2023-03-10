@@ -45,10 +45,6 @@ export class ConnectedStep extends React.Component<Props> {
     this.unregister()
   }
 
-  setNativeProps(obj: any) {
-    this.wrapper.setNativeProps(obj)
-  }
-
   register() {
     if (this.props.context && this.props.context.registerStep) {
       this.props.context.registerStep(this.props.tourKey, {
